@@ -6,6 +6,8 @@ Reloaded, Raging Echoes), filter by region/difficulty/activity type, save
 one task per difficulty tier, and mark tasks complete against a background
 log.
 
+**Website:** <https://ronovo.github.io/Leagues-Task-Plugin/>
+
 Beyond browsing and manual completion, the plugin also:
 
 - **Autocompletes tasks the client can verify for itself** — quest
@@ -248,9 +250,6 @@ from the RuneLite or Jagex launcher. A copied jar is silently ignored.
 **From the Plugin Hub** (once accepted): in RuneLite open the wrench
 (**Configuration**) → **Plugin Hub**, search for **Leagues Tasks**, click
 **Install**, then open it from the new sidebar icon.
-
-A companion landing page lives at
-<https://ronovo.github.io/Leagues-Task-Plugin/>.
 
 ## Known to-dos
 
