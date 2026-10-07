@@ -1,0 +1,28 @@
+About Plugin
+
+Leagues Tasks is a standalone RuneLite plugin. The task list ships as a
+bundled resource and all of your progress is saved locally through
+RuneLite's own config, so the plugin needs no server of its own.
+
+Works on any account type:
+- Existing main accounts
+- Ironmen of all flavors
+- Task-locked fresh accounts
+
+The flow:
+- Browse the task list and filter by region, difficulty, and activity type.
+- Add a task to your list two ways: assign a specific task yourself from its detail page, or use Pick Random Task to roll one from the filtered pool. Your list holds one task per difficulty tier, beginner through master.
+- Mark tasks complete by hand, or use Autocomplete Tasks to mark off what the client can verify for itself, on confirmation. Nothing is marked without you asking.
+- Completions are tracked per account, so an alt never overwrites a main's progress.
+
+Optional sync: if you run the Personal RuneScape Tracker web app, the
+Sync Progress screen can push your progress to it. Sync is opt-in, needs
+a server URL and token in the plugin settings, and only sends data
+outward -- nothing from the tracker changes your local progress. See the
+"Tracker App" page for details.
+
+A sync sends your character name and account hash, your quest completion
+states, your achievement diary and combat achievement progress, your
+completed-task list, and -- only when you capture it from the in-game
+Collection Log -- your collection log. Nothing is sent until you enter a
+server URL and token and press a Sync button.

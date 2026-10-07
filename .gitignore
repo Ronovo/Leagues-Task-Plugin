@@ -1,0 +1,9 @@
+.gradle/
+build/
+out/
+.idea/
+.vscode/
+.claude/
+*.iml
+**/__pycache__/
+site-archive/

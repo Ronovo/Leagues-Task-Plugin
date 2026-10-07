@@ -1,0 +1,67 @@
+plugins {
+	id 'java'
+}
+
+group = 'com.leaguestasks'
+version = '0.1.0'
+
+// The Plugin Hub builds every submission against its own pinned client
+// version; locally and in CI 'latest.release' compiles against whatever
+// client you actually run. This is the value the Plugin Hub docs ask for.
+def runeLiteVersion = 'latest.release'
+def pluginMainClass = 'com.leaguestasks.LeaguesTasksPluginLauncher'
+
+def lombokVersion = '1.18.34'
+
+repositories {
+	mavenLocal()
+	maven {
+		url = 'https://repo.runelite.net'
+		content {
+			includeGroupByRegex("net\\.runelite.*")
+		}
+	}
+	mavenCentral()
+}
+
+dependencies {
+	compileOnly group: 'net.runelite', name: 'client', version: runeLiteVersion
+
+	compileOnly "org.projectlombok:lombok:${lombokVersion}"
+	annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+	testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+	testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+	testImplementation group: 'net.runelite', name: 'client', version: runeLiteVersion
+	testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+	testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.11.0'
+	// Pinned to 3.14.9 (not the newer 4.x line) to match the okhttp3
+	// version net.runelite:client itself pulls in transitively -- mixing
+	// okhttp 3.x (from the client) and 4.x (the Kotlin rewrite, from a
+	// newer mockwebserver) on the same test classpath risks a resolved
+	// version neither ProgressSyncClient nor this test were built against.
+	testImplementation group: 'com.squareup.okhttp3', name: 'mockwebserver', version: '3.14.9'
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.encoding = 'UTF-8'
+	options.release.set(11)
+}
+
+// Launches a local RuneLite client with this plugin sideloaded, for
+// development/testing. See src/test/java/.../LeaguesTasksPluginLauncher.java.
+tasks.register('run', JavaExec) {
+	classpath = sourceSets.test.runtimeClasspath
+	mainClass = pluginMainClass
+
+	jvmArgs '-ea'
+	args '--developer-mode', '--debug'
+}
+
+// Local mock HTTP listener for manually exercising the Sync Progress
+// button end-to-end without a real website -- see
+// src/test/java/.../sync/MockSyncServerLauncher.java. Run alongside `run`.
+tasks.register('runMockSyncServer', JavaExec) {
+	classpath = sourceSets.test.runtimeClasspath
+	mainClass = 'com.leaguestasks.sync.MockSyncServerLauncher'
+}

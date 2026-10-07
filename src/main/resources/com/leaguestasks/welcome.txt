@@ -1,0 +1,13 @@
+Welcome to Leagues Tasks.
+
+This plugin brings the Old School RuneScape Leagues task format to the main game.
+
+A Leagues event gives you a large curated checklist of goals across skilling, bosses, quests, and regions -- this plugin lets you work through that same kind of checklist on any account, at any time.
+
+Its task list is a curated set drawn from past Leagues events, gathered into one list you can filter, roll from at random or pick from yourself, and check off as you complete tasks.
+
+See "About Plugin" for how the plugin works, and "Tracker App" for the optional companion website.
+
+Created by Ian Kent.
+
+IGN RonovoRonove
