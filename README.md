@@ -140,12 +140,16 @@ The bundled `combat_achievement_index.json` is a slim copy of the tracker's
 ## Running the dev client
 
 ```
-./gradlew run
+./gradlew run               # just Leagues Tasks
+./gradlew runWithSyncTool   # Leagues Tasks and Ronovo's Sync Tool
 ```
 
-This launches a local RuneLite client (via
+`run` launches a local RuneLite client (via
 `src/test/java/.../LeaguesTasksPluginLauncher.java`) with the plugin
-sideloaded. Confirm the toolbar icon appears, the panel opens, filters
+sideloaded. `runWithSyncTool` also builds and loads [Ronovo's Sync
+Tool](https://github.com/Ronovo/Ronovos-Sync-Tool) from `../Ronovos-Sync-Tool`
+(or `-PsyncToolDir=<path>`), which the start menu's **Sync Progress** button
+needs. If that folder isn't there, it warns and starts Leagues Tasks alone. Confirm the toolbar icon appears, the panel opens, filters
 populate, "Pick Random Task" returns a task consistent with the selected
 filters, and Show My List / Check Full List / marking a task complete work.
 
@@ -192,7 +196,9 @@ The plugin is not on the Plugin Hub yet. Until it is, run it from source:
 1. Install **JDK 11** and set `JAVA_HOME` (see [Prerequisites](#prerequisites)).
 2. Download this repository (**Code → Download ZIP**, then extract) or clone it.
 3. In that folder run `./gradlew run` (`gradlew.bat run` on Windows). This
-   builds the plugin and opens a RuneLite client with it already loaded.
+   builds the plugin and opens a RuneLite client with it already loaded. To
+   load Ronovo's Sync Tool too, download it into a folder next to this one and
+   run `./gradlew runWithSyncTool` instead.
 4. Log in and open **Leagues Tasks** from its sidebar icon.
 
 **Jagex accounts:** the client that `./gradlew run` starts can't use the Jagex

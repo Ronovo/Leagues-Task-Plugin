@@ -15,9 +15,7 @@ import javax.swing.JPanel;
 
 /**
  * Preview and confirm flow for marking tasks complete from stats the client
- * can read (quests, skill levels, boss kills, etc.). Split from
- * {@link SyncCard} because it writes local progress and needs its own
- * confirm step, unlike sync actions that only transmit existing data.
+ * can read (quests, skill levels, boss kills, etc.).
  */
 public class AutocompleteCard extends JPanel
 {

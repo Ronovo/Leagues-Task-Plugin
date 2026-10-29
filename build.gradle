@@ -43,11 +43,37 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 // Launches a local RuneLite client with this plugin sideloaded, for
-// development/testing. See src/test/java/.../LeaguesTasksPluginLauncher.java.
-tasks.register('run', JavaExec) {
-	classpath = sourceSets.test.runtimeClasspath
-	mainClass = pluginMainClass
+// development/testing. See src/test/java/.../*PluginLauncher.java.
+def devClient = { JavaExec t ->
+	t.classpath = sourceSets.test.runtimeClasspath
+	t.mainClass = pluginMainClass
+	t.jvmArgs '-ea'
+	t.args '--developer-mode', '--debug'
+}
 
-	jvmArgs '-ea'
-	args '--developer-mode', '--debug'
+tasks.register('run', JavaExec) { devClient(it) }
+
+// Same client as `run`, plus Ronovo's Sync Tool compiled from its own folder
+// (../Ronovos-Sync-Tool, or -PsyncToolDir=<path>). Without that folder it warns and
+// starts Leagues Tasks alone.
+def otherPluginDir = file(findProperty('syncToolDir') ?: '../Ronovos-Sync-Tool')
+def otherPluginFound = new File(otherPluginDir, 'build.gradle').exists()
+
+tasks.register('buildOtherPlugin', GradleBuild) {
+	onlyIf { otherPluginFound }
+	dir = otherPluginDir
+	tasks = ['classes']
+}
+
+tasks.register('runWithSyncTool', JavaExec) {
+	devClient(it)
+	dependsOn 'buildOtherPlugin'
+	classpath += files("$otherPluginDir/build/classes/java/main", "$otherPluginDir/build/resources/main")
+	doFirst {
+		if (otherPluginFound) {
+			systemProperty 'extraPlugins', 'com.ronovosync.RonovosSyncPlugin'
+		} else {
+			logger.warn("Ronovo's Sync Tool not found at $otherPluginDir (set -PsyncToolDir=<path>); starting Leagues Tasks alone.")
+		}
+	}
 }
