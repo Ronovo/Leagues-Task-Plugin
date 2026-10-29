@@ -13,7 +13,6 @@
 | `./gradlew test` | Run the unit tests. |
 | `./gradlew build` | Compile, run tests, and produce the plugin jar under `build/libs/`. (RuneLite only loads a jar from `sideloaded-plugins` in developer mode, so use `./gradlew run` to try it.) |
 | `./gradlew run` | Launch a local RuneLite client with the plugin sideloaded. |
-| `./gradlew runMockSyncServer` | Local HTTP listener that logs every sync POST and returns 200, for exercising the Sync buttons without a real tracker. |
 
 ## The data file: `src/main/resources/com/leaguestasks/leagues_tasks.json`
 

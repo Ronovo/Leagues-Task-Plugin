@@ -1,8 +1,5 @@
 package com.leaguestasks;
 
-import com.google.inject.Provides;
-import com.leaguestasks.sync.CollectionLogCapture;
-import com.leaguestasks.sync.CollectionLogSyncButton;
 import com.leaguestasks.sync.TaskAutoDetector;
 import java.awt.image.BufferedImage;
 import javax.inject.Inject;
@@ -15,13 +12,13 @@ import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.util.ImageUtil;
 
 /**
- * RuneLite plugin entry point: browse and randomise Leagues tasks, and sync
- * progress to a personal tracker.
+ * RuneLite plugin entry point: browse and randomise Leagues tasks, and
+ * autocomplete what the client can verify.
  */
 @PluginDescriptor(
     name = "Leagues Tasks",
     description = "Browse and randomly pick a task from a unified list of every past OSRS Leagues event, "
-        + "filterable by region, difficulty, and activity type, with progress sync and autocomplete.",
+        + "filterable by region, difficulty, and activity type, with autocomplete.",
     tags = {"leagues", "tasks", "randomizer", "ironman"}
 )
 public class LeaguesTasksPlugin extends Plugin
@@ -35,10 +32,7 @@ public class LeaguesTasksPlugin extends Plugin
     private LeaguesTasksPanel panel;
 
     @Inject
-    private CollectionLogCapture collectionLogCapture;
-
-    @Inject
-    private CollectionLogSyncButton collectionLogSyncButton;
+    private ConfigManager configManager;
 
     @Inject
     private TaskAutoDetector taskAutoDetector;
@@ -46,19 +40,12 @@ public class LeaguesTasksPlugin extends Plugin
     private NavigationButton navButton;
 
     /**
-     * {@link CollectionLogCapture}/{@link CollectionLogSyncButton}/
-     * {@link TaskAutoDetector} subscribe to game events themselves rather
-     * than relying on a Plugin's {@code @Subscribe} auto-registration, so
-     * they need pairing with shutDown() -- and must not double-register on
-     * a plugin re-toggle.
+     * {@link TaskAutoDetector} subscribes to game events itself rather than
+     * relying on a Plugin's {@code @Subscribe} auto-registration, so it needs
+     * pairing with shutDown() -- and must not double-register on a plugin
+     * re-toggle.
      */
     private boolean started;
-
-    @Provides
-    LeaguesTasksConfig provideConfig(ConfigManager configManager)
-    {
-        return configManager.getConfig(LeaguesTasksConfig.class);
-    }
 
     @Override
     protected void startUp() throws Exception
@@ -86,8 +73,7 @@ public class LeaguesTasksPlugin extends Plugin
         if (!started)
         {
             started = true;
-            collectionLogCapture.startUp();
-            collectionLogSyncButton.startUp();
+            removeMovedSyncKeys();
             taskAutoDetector.setOnAccountChanged(panel::refreshCompletionState);
             taskAutoDetector.startUp();
         }
@@ -100,10 +86,22 @@ public class LeaguesTasksPlugin extends Plugin
         {
             started = false;
             taskAutoDetector.shutDown();
-            collectionLogSyncButton.shutDown();
-            collectionLogCapture.shutDown();
         }
 
         clientToolbar.removeNavigation(navButton);
+    }
+
+    // TODO: remove once existing installs have run this version. Syncing moved
+    // to Ronovo's Sync Tool, which starts with its own clean settings, so these
+    // keys are no longer read by anything.
+    private void removeMovedSyncKeys()
+    {
+        configManager.unsetConfiguration(ConfigKeys.GROUP, "serverUrl");
+        configManager.unsetConfiguration(ConfigKeys.GROUP, "apiToken");
+        String groupPrefix = ConfigKeys.GROUP + ".";
+        for (String key : configManager.getConfigurationKeys(groupPrefix + "leagues.collectionLog"))
+        {
+            configManager.unsetConfiguration(ConfigKeys.GROUP, key.substring(groupPrefix.length()));
+        }
     }
 }

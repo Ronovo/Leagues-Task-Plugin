@@ -49,8 +49,6 @@ public final class SwingComponents
     public static final Color AUTOCOMPLETE_COLOR = new Color(150, 55, 95);
     /** Bronze — start-menu "Tracker App"; distinct from the blue/purple info buttons and gold "Pick Random Task". */
     public static final Color TRACKER_COLOR = new Color(120, 75, 40);
-    /** Steel blue — Sync to Website section buttons; distinct from the green "Sync Everything". */
-    public static final Color SYNC_COLOR = new Color(40, 95, 150);
 
     private SwingComponents()
     {

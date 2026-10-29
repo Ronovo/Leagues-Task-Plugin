@@ -11,9 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Shared per-account storage plumbing for the three things this plugin keeps
- * one copy of per character: completed tasks, saved tasks, and the cached
- * collection log dump. Each owner constructs one with its own key prefix.
+ * Shared per-account storage plumbing for the two things this plugin keeps
+ * one copy of per character: completed tasks and saved tasks. Each owner
+ * constructs one with its own key prefix.
  *
  * <p>It holds the active account, keeps {@link ConfigKeys#LAST_ACCOUNT} in
  * step (so a logged-out panel still shows the last character's data),

@@ -8,14 +8,13 @@ import net.runelite.api.Client;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
+import net.runelite.client.plugins.PluginManager;
 import net.runelite.client.ui.ClientToolbar;
 import okhttp3.OkHttpClient;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * The object graph resolves end to end.
@@ -30,7 +29,6 @@ public class LeaguesTasksPluginWiringTest
     public void objectGraphResolves()
     {
         ConfigManager configManager = mock(ConfigManager.class);
-        when(configManager.getConfig(any())).thenReturn(mock(LeaguesTasksConfig.class));
 
         Injector injector = Guice.createInjector(new LeaguesTasksPlugin(), new AbstractModule()
         {
@@ -42,6 +40,7 @@ public class LeaguesTasksPluginWiringTest
                 bind(ClientToolbar.class).toInstance(mock(ClientToolbar.class));
                 bind(ConfigManager.class).toInstance(configManager);
                 bind(EventBus.class).toInstance(mock(EventBus.class));
+                bind(PluginManager.class).toInstance(mock(PluginManager.class));
                 bind(OkHttpClient.class).toInstance(new OkHttpClient());
                 bind(Gson.class).toInstance(new Gson());
             }

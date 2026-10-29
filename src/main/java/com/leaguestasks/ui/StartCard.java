@@ -1,16 +1,29 @@
 package com.leaguestasks.ui;
 
 import com.leaguestasks.model.TaskRepository;
+import com.leaguestasks.sync.SyncToolBridge;
 import java.awt.Dimension;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JSeparator;
 
-/** Primary menu card routing to the list, browse, picker, sync, and info cards. */
+/**
+ * Primary menu card routing to the list, browse, picker, and info cards. The
+ * sync button asks Ronovo's Sync Tool for a tasks sync when it is turned on,
+ * and otherwise opens the Tracker App card, which explains installing it.
+ */
 public class StartCard extends MenuCard
 {
-    public StartCard(Navigator navigator)
+    private static final String SYNC_LABEL = "Sync Progress";
+    private static final String INSTALL_LABEL = "Install Ronovo's Sync Tool";
+
+    private final SyncToolBridge syncToolBridge;
+    private final JButton syncButton;
+
+    public StartCard(Navigator navigator, SyncToolBridge syncToolBridge)
     {
+        this.syncToolBridge = syncToolBridge;
+
         JButton showListButton = SwingComponents.centeredButton("Show My List");
         showListButton.addActionListener(e -> navigator.showList());
 
@@ -20,8 +33,20 @@ public class StartCard extends MenuCard
         JButton pickButton = SwingComponents.centeredButton("Pick Random Task");
         pickButton.addActionListener(e -> navigator.showPicker(TaskRepository.ANY));
 
-        JButton syncButton = SwingComponents.centeredButton("Sync Progress");
-        syncButton.addActionListener(e -> navigator.showSync());
+        syncButton = SwingComponents.centeredButton(SYNC_LABEL);
+        syncButton.addActionListener(e ->
+        {
+            if (syncToolBridge.isSyncToolActive())
+            {
+                syncToolBridge.requestTaskSync();
+            }
+            else
+            {
+                navigator.showCard(Navigator.CARD_TRACKER);
+            }
+            refreshSyncButton();
+        });
+        refreshSyncButton();
 
         JButton autocompleteButton = SwingComponents.centeredButton("Autocomplete Tasks");
         autocompleteButton.addActionListener(e -> navigator.showAutocomplete());
@@ -74,5 +99,10 @@ public class StartCard extends MenuCard
         add(syncButton);
         add(Box.createVerticalGlue());
         add(Box.createVerticalGlue());
+    }
+
+    public void refreshSyncButton()
+    {
+        syncButton.setText(syncToolBridge.isSyncToolActive() ? SYNC_LABEL : INSTALL_LABEL);
     }
 }

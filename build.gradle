@@ -35,12 +35,6 @@ dependencies {
 	testImplementation group: 'net.runelite', name: 'client', version: runeLiteVersion
 	testImplementation group: 'junit', name: 'junit', version: '4.13.2'
 	testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.11.0'
-	// Pinned to 3.14.9 (not the newer 4.x line) to match the okhttp3
-	// version net.runelite:client itself pulls in transitively -- mixing
-	// okhttp 3.x (from the client) and 4.x (the Kotlin rewrite, from a
-	// newer mockwebserver) on the same test classpath risks a resolved
-	// version neither ProgressSyncClient nor this test were built against.
-	testImplementation group: 'com.squareup.okhttp3', name: 'mockwebserver', version: '3.14.9'
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -56,12 +50,4 @@ tasks.register('run', JavaExec) {
 
 	jvmArgs '-ea'
 	args '--developer-mode', '--debug'
-}
-
-// Local mock HTTP listener for manually exercising the Sync Progress
-// button end-to-end without a real website -- see
-// src/test/java/.../sync/MockSyncServerLauncher.java. Run alongside `run`.
-tasks.register('runMockSyncServer', JavaExec) {
-	classpath = sourceSets.test.runtimeClasspath
-	mainClass = 'com.leaguestasks.sync.MockSyncServerLauncher'
 }

@@ -10,14 +10,19 @@ includes a Grand Exchange tool.
 You host it yourself. It is designed to run locally or on your own
 server; there is no public instance.
 
-Once it is running, set its URL and your API token in the plugin
-settings, then use the Sync Progress screen (or the Sync button on the
-in-game collection log) to push your progress to it. On a friend's LAN
-server the token is the shared SYNC_TOKEN; on a public site sign in and
-copy your personal plugin token. Prefer HTTPS if the tracker is not on
-this machine. The plugin only sends data to the tracker -- it never pulls
-anything back.
+Sending progress to it takes a second plugin, Ronovo's Sync Tool. This
+plugin keeps your tasks and autocompletes them on its own; the Sync Tool
+is what sends your completed tasks, quests, diaries, combat achievements
+and collection log to the tracker.
 
-Get it from GitHub:
+It is not on the Plugin Hub yet; until it is, install it by following its
+GitHub page below. Set the tracker's URL and your API token in its Sync
+Settings, then use its sidebar (or the Sync button on the in-game
+collection log) to sync. Once it is on, the Sync Progress button on this
+plugin's start menu sends your completed tasks through it.
+
+Get them from GitHub:
+
+[Ronovo's Sync Tool on GitHub](https://github.com/Ronovo/Ronovos-Sync-Tool)
 
 [Personal RuneScape Tracker on GitHub](https://github.com/Ronovo/Personal-RuneScape-Tracker)

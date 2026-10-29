@@ -9,8 +9,6 @@ public interface Navigator
     String CARD_LIST = "list";
     String CARD_DETAIL = "detail";
     String CARD_BROWSE = "browse";
-    String CARD_SYNC = "sync";
-    String CARD_SYNC_SETTINGS = "syncSettings";
     String CARD_AUTOCOMPLETE = "autocomplete";
     String CARD_WELCOME = "welcome";
     String CARD_ABOUT = "about";
@@ -26,10 +24,6 @@ public interface Navigator
     void showList();
 
     void showBrowse();
-
-    void showSync();
-
-    void showSyncSettings();
 
     void showAutocomplete();
 

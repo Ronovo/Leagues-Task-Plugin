@@ -4,7 +4,7 @@ import com.leaguestasks.model.CompletedTaskStore;
 import com.leaguestasks.model.SavedTaskStore;
 import com.leaguestasks.model.TaskEntry;
 import com.leaguestasks.model.TaskRepository;
-import com.leaguestasks.sync.ProgressSyncClient;
+import com.leaguestasks.sync.SyncToolBridge;
 import com.leaguestasks.sync.TaskAutoDetector;
 import com.leaguestasks.ui.AutocompleteCard;
 import com.leaguestasks.ui.BrowseCard;
@@ -16,8 +16,6 @@ import com.leaguestasks.ui.Navigator;
 import com.leaguestasks.ui.PickerCard;
 import com.leaguestasks.ui.StartCard;
 import com.leaguestasks.ui.SwingComponents;
-import com.leaguestasks.ui.SyncCard;
-import com.leaguestasks.ui.SyncSettingsCard;
 import java.awt.BorderLayout;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -26,13 +24,12 @@ import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
-import net.runelite.client.config.ConfigManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
 
 /**
- * The plugin's sidebar panel and its only {@link PluginPanel}: eleven cards
- * (start, picker, list, browse, detail, sync, sync settings, autocomplete, welcome, about, tracker)
+ * The plugin's sidebar panel and its only {@link PluginPanel}: nine cards
+ * (start, picker, list, browse, detail, autocomplete, welcome, about, tracker)
  * switched by a {@link CardPanel}. Text and controls are center-aligned, except the
  * bulleted requirements list and the left-aligned prose of the Welcome/About/Tracker cards.
  *
@@ -48,34 +45,29 @@ public class LeaguesTasksPanel extends PluginPanel implements Navigator
     private final TaskRepository repository;
     private final SavedTaskStore savedTaskStore;
     private final CompletedTaskStore completedTaskStore;
-    private final ProgressSyncClient progressSyncClient;
     private final TaskAutoDetector taskAutoDetector;
-    private final ConfigManager configManager;
-    private final LeaguesTasksConfig config;
+    private final SyncToolBridge syncToolBridge;
 
     private final CardPanel contentPanel = new CardPanel();
 
+    private StartCard startCard;
     private PickerCard pickerCard;
     private ListCard listCard;
     private BrowseCard browseCard;
     private DetailCard detailCard;
-    private SyncCard syncCard;
     private AutocompleteCard autocompleteCard;
-    private SyncSettingsCard syncSettingsCard;
     private boolean initialized;
 
     @Inject
     public LeaguesTasksPanel(TaskRepository repository, SavedTaskStore savedTaskStore,
-        CompletedTaskStore completedTaskStore, ProgressSyncClient progressSyncClient,
-        TaskAutoDetector taskAutoDetector, ConfigManager configManager, LeaguesTasksConfig config)
+        CompletedTaskStore completedTaskStore, TaskAutoDetector taskAutoDetector,
+        SyncToolBridge syncToolBridge)
     {
         this.repository = repository;
         this.savedTaskStore = savedTaskStore;
         this.completedTaskStore = completedTaskStore;
-        this.progressSyncClient = progressSyncClient;
         this.taskAutoDetector = taskAutoDetector;
-        this.configManager = configManager;
-        this.config = config;
+        this.syncToolBridge = syncToolBridge;
     }
 
     /** Guarded against re-entry: the plugin can be toggled off and on. */
@@ -87,13 +79,12 @@ public class LeaguesTasksPanel extends PluginPanel implements Navigator
         }
         initialized = true;
 
+        startCard = new StartCard(this, syncToolBridge);
         pickerCard = new PickerCard(repository, savedTaskStore, completedTaskStore, this);
         listCard = new ListCard(repository, savedTaskStore, this);
         browseCard = new BrowseCard(repository, completedTaskStore, this);
         detailCard = new DetailCard(completedTaskStore, savedTaskStore, this);
-        syncCard = new SyncCard(progressSyncClient, this);
         autocompleteCard = new AutocompleteCard(taskAutoDetector, this);
-        syncSettingsCard = new SyncSettingsCard(configManager, config, this);
 
         setLayout(new BorderLayout());
         setBackground(ColorScheme.DARK_GRAY_COLOR);
@@ -101,14 +92,12 @@ public class LeaguesTasksPanel extends PluginPanel implements Navigator
             SwingComponents.PANEL_BORDER_PX, SwingComponents.PANEL_BORDER_PX,
             SwingComponents.PANEL_BORDER_PX, SwingComponents.PANEL_BORDER_PX));
 
-        contentPanel.add(new StartCard(this), Navigator.CARD_START);
+        contentPanel.add(startCard, Navigator.CARD_START);
         contentPanel.add(pickerCard, Navigator.CARD_PICKER);
         contentPanel.add(listCard, Navigator.CARD_LIST);
         contentPanel.add(detailCard, Navigator.CARD_DETAIL);
         contentPanel.add(browseCard, Navigator.CARD_BROWSE);
-        contentPanel.add(syncCard, Navigator.CARD_SYNC);
         contentPanel.add(autocompleteCard, Navigator.CARD_AUTOCOMPLETE);
-        contentPanel.add(syncSettingsCard, Navigator.CARD_SYNC_SETTINGS);
         contentPanel.add(new InfoCard("/com/leaguestasks/welcome.txt", this), Navigator.CARD_WELCOME);
         contentPanel.add(new InfoCard("/com/leaguestasks/about.txt", this), Navigator.CARD_ABOUT);
         contentPanel.add(new InfoCard("/com/leaguestasks/tracker.txt", this), Navigator.CARD_TRACKER);
@@ -164,10 +153,27 @@ public class LeaguesTasksPanel extends PluginPanel implements Navigator
         });
     }
 
+    /**
+     * The Sync Tool is turned on and off from RuneLite's plugin list, which
+     * means leaving this panel, so opening it is when the button can be stale.
+     */
+    @Override
+    public void onActivate()
+    {
+        if (initialized)
+        {
+            startCard.refreshSyncButton();
+        }
+    }
+
     @Override
     public void showCard(String cardName)
     {
-        if (Navigator.CARD_LIST.equals(cardName))
+        if (Navigator.CARD_START.equals(cardName))
+        {
+            startCard.refreshSyncButton();
+        }
+        else if (Navigator.CARD_LIST.equals(cardName))
         {
             listCard.refresh();
         }
@@ -207,24 +213,10 @@ public class LeaguesTasksPanel extends PluginPanel implements Navigator
     }
 
     @Override
-    public void showSync()
-    {
-        syncCard.onOpened();
-        showCard(Navigator.CARD_SYNC);
-    }
-
-    @Override
     public void showAutocomplete()
     {
         autocompleteCard.onOpened();
         showCard(Navigator.CARD_AUTOCOMPLETE);
-    }
-
-    @Override
-    public void showSyncSettings()
-    {
-        syncSettingsCard.onOpened();
-        showCard(Navigator.CARD_SYNC_SETTINGS);
     }
 
     @Override

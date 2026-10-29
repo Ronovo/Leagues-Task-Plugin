@@ -4,9 +4,8 @@ import com.google.gson.Gson;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.leaguestasks.sync.CollectionLogCapture;
-import com.leaguestasks.sync.CollectionLogSyncButton;
 import com.leaguestasks.sync.TaskAutoDetector;
+import java.util.Arrays;
 import net.runelite.api.Client;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
@@ -17,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -29,22 +29,18 @@ import static org.mockito.Mockito.when;
  */
 public class LeaguesTasksPluginLifecycleTest
 {
-    private CollectionLogCapture collectionLogCapture;
-    private CollectionLogSyncButton collectionLogSyncButton;
     private TaskAutoDetector taskAutoDetector;
     private ClientToolbar clientToolbar;
+    private ConfigManager configManager;
     private LeaguesTasksPlugin plugin;
 
     @Before
     public void setUp()
     {
-        collectionLogCapture = mock(CollectionLogCapture.class);
-        collectionLogSyncButton = mock(CollectionLogSyncButton.class);
         taskAutoDetector = mock(TaskAutoDetector.class);
         clientToolbar = mock(ClientToolbar.class);
 
-        ConfigManager configManager = mock(ConfigManager.class);
-        when(configManager.getConfig(any())).thenReturn(mock(LeaguesTasksConfig.class));
+        configManager = mock(ConfigManager.class);
 
         Injector injector = Guice.createInjector(new LeaguesTasksPlugin(), new AbstractModule()
         {
@@ -59,8 +55,6 @@ public class LeaguesTasksPluginLifecycleTest
                 bind(OkHttpClient.class).toInstance(new OkHttpClient());
                 bind(Gson.class).toInstance(new Gson());
                 bind(LeaguesTasksPanel.class).toInstance(mock(LeaguesTasksPanel.class));
-                bind(CollectionLogCapture.class).toInstance(collectionLogCapture);
-                bind(CollectionLogSyncButton.class).toInstance(collectionLogSyncButton);
                 bind(TaskAutoDetector.class).toInstance(taskAutoDetector);
             }
         });
@@ -69,13 +63,26 @@ public class LeaguesTasksPluginLifecycleTest
     }
 
     @Test
+    public void startUpRemovesKeysThatMovedToTheSyncTool() throws Exception
+    {
+        when(configManager.getConfigurationKeys("leaguestasks.leagues.collectionLog")).thenReturn(Arrays.asList(
+            "leaguestasks.leagues.collectionLog.zezima", "leaguestasks.leagues.collectionLog.some_alt"));
+
+        plugin.startUp();
+
+        verify(configManager).unsetConfiguration("leaguestasks", "serverUrl");
+        verify(configManager).unsetConfiguration("leaguestasks", "apiToken");
+        verify(configManager).unsetConfiguration("leaguestasks", "leagues.collectionLog.zezima");
+        verify(configManager).unsetConfiguration("leaguestasks", "leagues.collectionLog.some_alt");
+        verify(configManager, times(0)).unsetConfiguration(any(), startsWith("leagues.completedTasks"));
+    }
+
+    @Test
     public void doubleStartUpRegistersEachSubsystemOnce() throws Exception
     {
         plugin.startUp();
         plugin.startUp();
 
-        verify(collectionLogCapture, times(1)).startUp();
-        verify(collectionLogSyncButton, times(1)).startUp();
         verify(taskAutoDetector, times(1)).startUp();
     }
 
@@ -87,12 +94,8 @@ public class LeaguesTasksPluginLifecycleTest
         plugin.startUp();
         plugin.shutDown();
 
-        verify(collectionLogCapture, times(2)).startUp();
-        verify(collectionLogCapture, times(2)).shutDown();
         verify(taskAutoDetector, times(2)).startUp();
         verify(taskAutoDetector, times(2)).shutDown();
-        verify(collectionLogSyncButton, times(2)).startUp();
-        verify(collectionLogSyncButton, times(2)).shutDown();
         verify(clientToolbar, times(2)).addNavigation(any());
         verify(clientToolbar, times(2)).removeNavigation(any());
     }
@@ -102,8 +105,6 @@ public class LeaguesTasksPluginLifecycleTest
     {
         plugin.shutDown();
 
-        verify(collectionLogCapture, times(0)).shutDown();
-        verify(collectionLogSyncButton, times(0)).shutDown();
         verify(taskAutoDetector, times(0)).shutDown();
         verify(clientToolbar, times(1)).removeNavigation(any());
     }

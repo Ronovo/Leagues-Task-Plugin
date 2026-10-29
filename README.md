@@ -18,11 +18,12 @@ Beyond browsing and manual completion, the plugin also:
   "Autocomplete Tasks" flow: a preview showing
   what would be marked, then a second click to confirm and write it. Nothing
   is written until that confirm.
-- **Syncs progress to an external website** you configure and run yourself
-  (e.g. a self-hosted [Personal RuneScape
-  Tracker](https://github.com/Ronovo/Personal-RuneScape-Tracker) instance),
-  either from the sidebar's Sync card or an in-game button on the
-  collection log interface (collection log capture is in-game only).
+- **Hands your completed tasks to [Ronovo's Sync
+  Tool](https://github.com/Ronovo/Ronovos-Sync-Tool)** when that plugin is
+  installed, which sends them to a self-hosted [Personal RuneScape
+  Tracker](https://github.com/Ronovo/Personal-RuneScape-Tracker). This plugin
+  doesn't send your progress anywhere itself; see [Syncing to a
+  tracker](#syncing-to-a-tracker).
 - **Scopes completions and saved tasks per account**, so an alt's levels can never
   overwrite a main's progress.
 
@@ -40,11 +41,10 @@ src/main/java/com/leaguestasks/
   LeaguesTasksPlugin.java     @PluginDescriptor entry point, wires the sidebar
   LeaguesTasksPanel.java      the one PluginPanel; CardLayout coordinator for
                               the plugin's screens
-  LeaguesTasksConfig.java     shared connection settings
   ConfigKeys.java             every persisted key, in one place
   ui/                         per-card Swing views: StartCard, PickerCard,
-                              ListCard, BrowseCard, DetailCard, SyncCard,
-                              SyncSettingsCard, AutocompleteCard, InfoCard,
+                              ListCard, BrowseCard, DetailCard,
+                              AutocompleteCard, InfoCard,
                               shared TaskDetailsView + FilterGroup, plus shared
                               Swing pieces (SwingComponents, CardPanel, MenuCard,
                               Navigator, TextUtil, SavedTaskPrompt). This list is
@@ -56,8 +56,7 @@ src/main/java/com/leaguestasks/
     CompletedTaskStore.java background completion log, scoped per account
     CompletedTaskRecord.java one {taskId, completedAt, source} entry --
                              source is MANUAL or AUTO
-  sync/                   ProgressSyncClient (posts to the tracker),
-                          TaskAutoDetector (preview/apply autocomplete),
+  sync/                   TaskAutoDetector (preview/apply autocomplete),
                           AutoDetectRuleEvaluators (one check per RuleType),
                           AutoDetectGameState + its factory (the game state
                           a pass reads), QuestNameIndex (wiki quest title ->
@@ -65,9 +64,8 @@ src/main/java/com/leaguestasks/
                           CombatAchievementIndex (bundled CA tier metadata),
                           AchievementDiaryCatalog + CombatAchievementCatalog
                           (varbit reads for diary tiers and CA tasks),
-                          CollectionLogCapture + CollectionLogCatalog
-                          (reads the collection log from the game cache),
-                          CollectionLogSyncButton (in-game sync button)
+                          SyncToolBridge (finds Ronovo's Sync Tool and asks
+                          it for a tasks sync)
 src/main/resources/com/leaguestasks/
   icon.png                 sidebar toolbar icon
   leagues_tasks.json       the compiled unified task list (bundled resource)
@@ -79,9 +77,7 @@ src/test/java/com/leaguestasks/
   InMemoryConfig.java, CountDiff.java  shared test helpers
   ui/, model/, sync/           the test suite -- data integrity, repository
                                filtering, stores/account scoping, auto-detect
-                               rules, sync client, collection log catalog
-  sync/MockSyncServerLauncher.java
-                               dev-only local HTTP listener, see below
+                               rules, Sync Tool bridge
 ```
 
 ## Data: leagues_tasks.json
@@ -153,59 +149,24 @@ sideloaded. Confirm the toolbar icon appears, the panel opens, filters
 populate, "Pick Random Task" returns a task consistent with the selected
 filters, and Show My List / Check Full List / marking a task complete work.
 
-## Syncing to a website
+## Syncing to a tracker
 
-The Sync card (and the in-game collection log button) post to
-`LeaguesTasksConfig.serverUrl()` plus a section-specific `/api/sync/*` path,
-authenticated with a bearer `apiToken()`. Configure **Server URL** and
-**API Token** under **Sync Settings** in the sidebar — the same two fields
-also appear in RuneLite's own config panel for this plugin, under the
-**Tracker website** section. **Server URL is a base URL** (e.g.
-`http://localhost:4123` or `https://tracker.example`, no trailing path) — the
-plugin appends the correct path for each button, so don't include
-`/api/sync/...` yourself. Only `http` and `https` are accepted, and plain
-`http://` is accepted **only for localhost** — a non-localhost `http://` URL
-is rejected rather than send your token in cleartext, so use `https://` for a
-remote tracker. Redirects are not followed.
+This plugin has no sync code, no server settings, and no token. Sending
+progress to a [Personal RuneScape
+Tracker](https://github.com/Ronovo/Personal-RuneScape-Tracker) is the job of a
+separate plugin, [Ronovo's Sync Tool](https://github.com/Ronovo/Ronovos-Sync-Tool).
+It reads your completions straight from this plugin's saved config
+(`leaguestasks` / `leagues.completedTasks.<account>`), so those key names are
+a contract between the two plugins.
 
-The tracker must have the same value in `SYNC_TOKEN` as this plugin's API
-token when you self-host for friends. On a public hosted tracker, sign in on
-the website and paste your **personal plugin token** instead — there is no
-shared house password. Collection log sync is the **Sync** button on the in-game Collection
-Log interface; there is no sidebar Collection Log button.
+The start menu's sync button depends on whether the Sync Tool is installed
+and turned on:
 
-| Button | Endpoint |
-|---|---|
-| Sync Everything | `/api/sync/leagues` |
-| Sync Tasks | `/api/sync/tasks` |
-| Sync Quests | `/api/sync/quests` |
-| In-game Collection Log Sync | `/api/sync/collectionlog` |
-| Sync Achievement Diary | `/api/sync/diaries` |
-| Sync Combat Achievements | `/api/sync/combatachievements` |
-
-Each section-specific sync button sends only that section's data.
-
-### What a sync sends
-
-The plugin only ever sends data outward — it never reads the tracker's
-response back into your local progress. A sync posts:
-
-- your character name and account hash
-- your quest completion states
-- your collection log (only when captured from the in-game interface)
-- your achievement diary tier progress
-- your combat achievement progress
-- your list of completed tasks
-
-Nothing is sent until you have entered a Server URL and API Token and pressed
-a Sync button. There is no default or shared server.
-
-To exercise the Sync button against something real without a live website:
-
-```
-./gradlew runMockSyncServer   # in one terminal -- logs every request, returns 200
-./gradlew run                 # in another -- point Server URL at http://localhost:8090
-```
+- **On:** the button reads **Sync Progress**. Clicking it posts a RuneLite
+  `PluginMessage` (`ronovossync` / `syncTasks`) and the Sync Tool sends your
+  completed tasks, reporting the result in the chatbox.
+- **Off or not installed:** the button reads **Install Ronovo's Sync Tool** and
+  opens the Tracker App card, which explains how to install it.
 
 ## Tests
 
@@ -215,9 +176,9 @@ To exercise the Sync button against something real without a live website:
 
 The test suite covers data integrity (2,269 rows, unique IDs/names), task
 repository filtering, saved/completed task stores (including per-account
-scoping), auto-detect rule evaluation, the sync client (URL scheme, no
-redirects), achievement diary and combat achievement catalog varbit discovery,
-the collection log catalog's struct-param reads, and the full Guice wiring graph.
+scoping), auto-detect rule evaluation, achievement diary and combat
+achievement catalog varbit discovery, the Sync Tool bridge and start menu
+button, and the full Guice wiring graph.
 
 `DataIntegrityTest` and `AutoDetectRuleIntegrityTest` pin the task count
 (per region) and the rule count (per type) on purpose; a failure lists which
@@ -256,11 +217,6 @@ from the RuneLite or Jagex launcher. A copied jar is silently ignored.
 - **Toolbar icon:** `icon.png` is a generated placeholder.
 - **Screenshots:** none yet for this README or the landing page. Drop one at
   `docs/screenshot.png` and uncomment the screenshot block in `docs/index.html`.
-- **Collection log cache ids:** `CollectionLogCatalog` uses literal enum/param
-  ids (tabs enum, name/page/item params, the slot remap enum). RuneLite's
-  `gameval` API has no named constants for enums or params, so unlike the
-  other catalogs these can't be resolved by name. Re-check them if the
-  collection log interface changes.
 
 ## License
 

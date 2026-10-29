@@ -15,14 +15,8 @@ The flow:
 - Mark tasks complete by hand, or use Autocomplete Tasks to mark off what the client can verify for itself, on confirmation. Nothing is marked without you asking.
 - Completions are tracked per account, so an alt never overwrites a main's progress.
 
-Optional sync: if you run the Personal RuneScape Tracker web app, the
-Sync Progress screen can push your progress to it. Sync is opt-in, needs
-a server URL and token in the plugin settings, and only sends data
-outward -- nothing from the tracker changes your local progress. See the
-"Tracker App" page for details.
-
-A sync sends your character name and account hash, your quest completion
-states, your achievement diary and combat achievement progress, your
-completed-task list, and -- only when you capture it from the in-game
-Collection Log -- your collection log. Nothing is sent until you enter a
-server URL and token and press a Sync button.
+This plugin doesn't send your progress anywhere. Sending it to the Personal
+RuneScape Tracker web app is done by a separate plugin, Ronovo's Sync
+Tool, which reads your completed tasks from this plugin's saved data.
+With it turned on, the Sync Progress button on the start menu asks it to
+send them. See the "Tracker App" page for details.

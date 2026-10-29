@@ -40,7 +40,7 @@ import net.runelite.client.eventbus.Subscribe;
  * -- see {@link #onGameStateChanged}. Reading which account is playing is
  * not the same as writing progress for it.
  *
- * <p>Threading mirrors {@link ProgressSyncClient}: callers are on the EDT,
+ * <p>Threading: callers are on the EDT,
  * every client read happens on the client thread, and results come back on
  * the EDT via {@link SwingUtilities#invokeLater}, so callers need no thread
  * coordination.
@@ -56,7 +56,6 @@ public class TaskAutoDetector
     private final TaskRepository repository;
     private final CompletedTaskStore completedTaskStore;
     private final SavedTaskStore savedTaskStore;
-    private final CollectionLogCapture collectionLogCapture;
     private final HiscoresKillCatalog hiscoresKillCatalog;
     private final AutoDetectGameStateFactory gameStateFactory;
 
@@ -69,7 +68,6 @@ public class TaskAutoDetector
     public TaskAutoDetector(Client client, ClientThread clientThread, EventBus eventBus,
         TaskRepository repository, CompletedTaskStore completedTaskStore,
         SavedTaskStore savedTaskStore,
-        CollectionLogCapture collectionLogCapture,
         HiscoresKillCatalog hiscoresKillCatalog,
         AutoDetectGameStateFactory gameStateFactory)
     {
@@ -79,7 +77,6 @@ public class TaskAutoDetector
         this.repository = repository;
         this.completedTaskStore = completedTaskStore;
         this.savedTaskStore = savedTaskStore;
-        this.collectionLogCapture = collectionLogCapture;
         this.hiscoresKillCatalog = hiscoresKillCatalog;
         this.gameStateFactory = gameStateFactory;
     }
@@ -126,7 +123,6 @@ public class TaskAutoDetector
         }
 
         boolean changed = completedTaskStore.setAccount(name);
-        collectionLogCapture.setAccount(name);
         savedTaskStore.setAccount(name);
         if (changed && onAccountChanged != null)
         {
@@ -238,7 +234,6 @@ public class TaskAutoDetector
         if (player != null && player.getName() != null && !player.getName().isEmpty())
         {
             completedTaskStore.setAccount(player.getName());
-            collectionLogCapture.setAccount(player.getName());
             savedTaskStore.setAccount(player.getName());
         }
     }

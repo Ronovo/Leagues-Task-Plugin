@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Leagues Tasks &mdash; RuneLite plugin</title>
-<meta name="description" content="A RuneLite sidebar plugin to browse, randomise, and track every task from past Old School RuneScape Leagues events, with optional progress sync to a tracker you host yourself.">
+<meta name="description" content="A RuneLite sidebar plugin to browse, randomise, and track every task from past Old School RuneScape Leagues events, with an optional companion plugin to sync progress to a tracker you host yourself.">
 <meta name="color-scheme" content="dark light">
 
 <!-- Open Graph / social preview. Drop an image at docs/social.png (1200x630) to enable. -->
@@ -292,8 +292,8 @@
     <h1>Every Leagues task, in your RuneLite sidebar</h1>
     <p class="tag">
       Browse and randomise tasks from past Old School RuneScape Leagues events,
-      filter them the way you want, and track what you have finished &mdash; with
-      optional progress sync to a tracker you run yourself.
+      filter them the way you want, and track what you have finished &mdash; with an
+      optional companion plugin to sync progress to a tracker you run yourself.
     </p>
     <div class="cta">
       <a class="btn btn-primary" href="#install">How to install</a>
@@ -357,8 +357,9 @@
       </div>
       <div class="card">
         <h3><span class="dot"></span>Optional progress sync</h3>
-        <p>Send your progress to a Personal RuneScape Tracker instance you host
-          yourself. Opt-in, one direction only, and only when you press a Sync button.</p>
+        <p>Install <a href="https://github.com/Ronovo/Ronovos-Sync-Tool">Ronovo's Sync Tool</a>
+          alongside it to send your progress to a Personal RuneScape Tracker you host
+          yourself. Without it, this plugin sends nothing.</p>
       </div>
       <div class="card">
         <h3><span class="dot"></span>Per character</h3>
@@ -371,24 +372,23 @@
 
 <section id="data" style="background:var(--bg-2);">
   <div class="wrap">
-    <h2>What syncing sends</h2>
+    <h2>Data &amp; sync</h2>
     <p class="lede">
-      Sync is off until you set a server URL and token. When you press a Sync button,
-      the plugin sends only:
+      Your progress is saved locally through RuneLite's own config. This plugin has no
+      server settings and doesn't send your progress anywhere.
     </p>
     <div class="panel-box">
-      <ul>
-        <li>Your character name and account hash</li>
-        <li>Quest completion states</li>
-        <li>Your collection log (when the in-game interface is open)</li>
-        <li>Achievement diary progress</li>
-        <li>Combat achievement progress</li>
-        <li>Your list of completed Leagues tasks</li>
-      </ul>
+      <p>
+        Syncing lives in a separate plugin,
+        <a href="https://github.com/Ronovo/Ronovos-Sync-Tool">Ronovo's Sync Tool</a>.
+        It reads your completed tasks from this plugin's saved data and sends them,
+        along with your quests, diaries, combat achievements and collection log, to
+        your tracker.
+      </p>
       <p class="note">
-        The connection is one-way: the plugin posts to the server URL you configure and
-        never reads anything back. Nothing is sent unless you have entered a URL and
-        token and pressed a Sync button. There is no shared or default server.
+        With the Sync Tool turned on, the <b>Sync Progress</b> button on the start menu
+        asks it to send your completed tasks. Without it, that button reads
+        <b>Install Ronovo's Sync Tool</b> and explains how.
       </p>
     </div>
   </div>
@@ -435,10 +435,11 @@
       This page will be updated when it is.
     </p>
     <p class="lede" style="margin-top:22px;">
-      Syncing is optional and needs your own
+      Syncing is optional and needs
+      <a href="https://github.com/Ronovo/Ronovos-Sync-Tool">Ronovo's Sync Tool</a> plus your own
       <a href="https://github.com/Ronovo/Personal-RuneScape-Tracker">Personal RuneScape Tracker</a>
       instance &mdash; a self-hosted character log and Grand Exchange tool. See the
-      <a href="https://github.com/Ronovo/Leagues-Task-Plugin#readme">README</a> for setup.
+      Sync Tool's README for setup.
     </p>
   </div>
 </section>

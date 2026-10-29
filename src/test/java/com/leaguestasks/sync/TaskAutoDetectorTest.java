@@ -129,7 +129,7 @@ public class TaskAutoDetectorTest
             diaryCatalog, combatCatalog, new CombatAchievementIndex(), bossKillCatalog,
             clueScrollCatalog, new QuestNameIndex());
         return new TaskAutoDetector(client, clientThread, mock(EventBus.class),
-            new TaskRepository(new Gson()), store, mock(SavedTaskStore.class), mock(CollectionLogCapture.class),
+            new TaskRepository(new Gson()), store, mock(SavedTaskStore.class),
             hiscoresKillCatalog, gameStateFactory);
     }
 
