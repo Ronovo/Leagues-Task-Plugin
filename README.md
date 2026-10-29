@@ -6,7 +6,7 @@ Reloaded, Raging Echoes), filter by region/difficulty/activity type, save
 one task per difficulty tier, and mark tasks complete against a background
 log.
 
-**Website:** <https://ronovo.github.io/Leagues-Task-Plugin/>
+**Website:** <https://ronovo.github.io/projects/leagues-task-plugin/>
 
 Beyond browsing and manual completion, the plugin also:
 
@@ -221,8 +221,9 @@ from the RuneLite or Jagex launcher. A copied jar is silently ignored.
 ## Known to-dos
 
 - **Toolbar icon:** `icon.png` is a generated placeholder.
-- **Screenshots:** none yet for this README or the landing page. Drop one at
-  `docs/screenshot.png` and uncomment the screenshot block in `docs/index.html`.
+- **Screenshots:** none yet for this README or the landing page. The landing page
+  is `pages/leagues-task-plugin/` in
+  [ronovo-portfolio](https://github.com/Ronovo/ronovo-portfolio).
 
 ## License
 
